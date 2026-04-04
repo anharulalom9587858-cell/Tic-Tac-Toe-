@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anharul-Owner | Pro Edition</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --text-color: #ffffff;
+            --shadow-light: rgba(255, 255, 255, 0.05);
+            --shadow-dark: rgba(0, 0, 0, 0.5);
+            --accent-color: #e94560;
+            --header-bg: rgba(255, 255, 255, 0.03);
+        }
+
+        body.light-mode {
+            --bg-color: #f0f2f5;
+            --text-color: #1a1a2e;
+            --shadow-light: rgba(255, 255, 255, 0.9);
+            --shadow-dark: rgba(0, 0, 0, 0.1);
+            --header-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        header {
+            position: absolute;
+            top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 18px;
+            background: var(--header-bg);
+            border-radius: 50px;
+            border: 1px solid rgba(128, 128, 128, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, var(--text-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent-color); object-fit: cover; }
+
+        .settings-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--bg-color); border-radius: 50%; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; cursor: pointer; z-index: 100;
+            box-shadow: 4px 4px 8px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
+        }
+
+        #settings-modal, #helpline-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        #helpline-modal { z-index: 3000; }
+
+        .modal-content {
+            background: var(--bg-color); padding: 25px; border-radius: 20px; text-align: center;
+            border: 1px solid var(--accent-color); max-width: 300px; width: 85%;
+            color: var(--text-color);
+        }
+
+        .modal-content h3 { margin: 15px 0 5px; font-size: 0.8rem; text-transform: uppercase; color: var(--accent-color); }
+
+        .credits { margin-top: 15px; text-align: center; font-size: 0.9rem; opacity: 0.8; }
+        .owner-box { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 5px; }
+        .owner-img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--accent-color); }
+
+        .game-info { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 50px; }
+
+        .score-container {
+            display: flex; gap: 15px; padding: 12px 20px; border-radius: 20px;
+            background: var(--bg-color); box-shadow: 8px 8px 16px var(--shadow-dark), -4px -4px 12px var(--shadow-light);
+        }
+
+        .score-item { text-align: center; min-width: 50px; }
+        .score-label { font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; }
+        .score-val { font-size: 1.2rem; font-weight: 800; color: var(--accent-color); }
+
+        .high-score-footer {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #00ffcc;
+            text-shadow: 0 0 5px rgba(0, 255, 204, 0.3);
+        }
+
+        .streak-badge { font-size: 0.8rem; font-weight: bold; color: #ffbd03; }
+
+        button {
+            padding: 12px 20px; margin: 5px; font-size: 0.9rem; font-weight: 700;
+            cursor: pointer; color: var(--text-color); background: var(--bg-color); border: none; border-radius: 12px;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -3px -3px 9px var(--shadow-light);
+            transition: all 0.2s ease; text-transform: uppercase;
+        }
+
+        button:hover { color: var(--accent-color); transform: scale(1.02); }
+        .btn-small { padding: 6px 10px; font-size: 0.65rem; }
+
+        .btn-support {
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 5px;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.1);
+        }
+
+        .screen { display: none; flex-direction: column; align-items: center; animation: slideUp 0.4s ease-out; }
+        .active { display: flex; }
+
+        .board {
+            display: grid; grid-template-columns: repeat(3, 85px); gap: 10px; padding: 12px;
+            background: var(--bg-color); border-radius: 18px;
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -3px -3px 9px var(--shadow-light);
+        }
+
+        .cell {
+            width: 85px; height: 85px; background: var(--bg-color); border-radius: 10px;
+            box-shadow: 4px 4px 8px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; font-weight: 900; cursor: pointer;
+        }
+
+        #popup {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--text-color); color: var(--bg-color); padding: 30px; border-radius: 25px; z-index: 1000; text-align: center;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://i.ibb.co/C5YwGXQP/image.png" alt="Profile">
+        <h1> Tic Tac Toe </h1>
+    </header>
+
+    <div class="settings-btn" onclick="toggleSettings(true)">⚙️</div>
+
+    <div id="opening-page" class="screen active">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Start 👇👇</h2>
+        <button onclick="startGame()">Show Your GamePlay</button>
+        <div class="credits">
+            <div>YouTube : @MrJokerFF-098</div>
+            <div class="owner-box">
+                Game Owner: Anharul Alom 
+                <img src="https://i.ibb.co/7JFTjBhx/image.png" class="owner-img" alt="Owner">
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0">Settings</h2>
+            
+            <button id="music-toggle-btn" onclick="toggleMusic()">Music: ON</button>
+            <button id="mode-toggle-btn" onclick="toggleDarkMode()">Mode: Dark</button>
+            <button onclick="clearHighScore()" style="color: #ff4d4d; border: 1px solid #ff4d4d;">🗑️ Clear High Score</button>
+            <button onclick="showHelpline()">📞 Helpline</button>
+            
+            <button onclick="openSupport()" class="btn-support">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="red">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                Support
+            </button>
+
+            <h3>Theme Color</h3>
+            <div style="display:flex; justify-content:center; gap:5px;">
+                <button class="btn-small" onclick="changeTheme('#1a1a2e', '#e94560')">Blue</button>
+                <button class="btn-small" onclick="changeTheme('#064e3b', '#10b981')">Green</button>
+                <button class="btn-small" onclick="changeTheme('#2e1065', '#a855f7')">Purple</button>
+            </div>
+
+            <h3>Symbols</h3>
+            <div style="display:flex; justify-content:center; gap:5px;">
+                <button class="btn-small" onclick="changeSymbols('X', 'O')">X/O</button>
+                <button class="btn-small" onclick="changeSymbols('🔥', '❄️')">🔥/❄️</button>
+                <button class="btn-small" onclick="changeSymbols('⚔️', '🛡️')">⚔️/🛡️</button>
+            </div>
+
+            <button onclick="toggleSettings(false)" style="margin-top: 20px; font-size: 0.7rem; background: var(--accent-color); color:white; width:100%">Close</button>
+        </div>
+    </div>
+
+    <div id="helpline-modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0">Helpline</h2>
+            <p style="font-size: 0.9rem; margin-bottom: 20px;">Choose an option to contact support:</p>
+            
+            <button onclick="contactAction('sms')" style="width: 100%; margin-bottom: 10px; background: #007bff; color: white;">💬 Text</button>
+            <button onclick="contactAction('tel')" style="width: 100%; margin-bottom: 10px; background: #28a745; color: white;">📞 Call</button>
+            
+            <button onclick="closeHelpline()" style="margin-top: 15px; font-size: 0.7rem; background: var(--accent-color); color:white; width:100%">Cancel</button>
+        </div>
+    </div>
+
+    <div id="mode-page" class="screen">
+        <h2>Game Mode</h2>
+        <button onclick="handleMode('PvP')">Local 1vs1</button>
+        <button onclick="handleMode('PvC')">You vs AI</button>
+    </div>
+
+    <div id="level-page" class="screen">
+        <h2>AI Difficulty</h2>
+        <button onclick="handleLevel('Easy')">Easy</button>
+        <button onclick="handleLevel('Hard')">Hard</button>
+        <button onclick="handleLevel('Extra Hard')">X Tra Hard</button>
+    </div>
+
+    <div id="side-page" class="screen">
+        <h2>Choose Your Side</h2>
+        <div style="display: flex;">
+            <button onclick="handleSide(symX)" id="btn-side-x">X</button>
+            <button onclick="handleSide(symO)" id="btn-side-o">O</button>
+        </div>
+    </div>
+
+    <div id="game-page" class="screen">
+        <div class="game-info">
+            <div id="streak-display" class="streak-badge">No Streak yet 🔥</div>
+            <div class="score-container">
+                <div class="score-item"><div class="score-label" id="lbl-x">X</div><div class="score-val" id="score-x">0</div></div>
+                <div class="score-item"><div class="score-label">Draw</div><div class="score-val" id="score-draw">0</div></div>
+                <div class="score-item"><div class="score-label" id="lbl-o">O</div><div class="score-val" id="score-o">0</div></div>
+            </div>
+            <button class="btn-reset" onclick="resetScores()">Reset Current Scores</button>
+        </div>
+        
+        <h3 id="status" style="margin-bottom: 10px; color: var(--accent-color);">Turn</h3>
+        
+        <div class="board" id="board">
+            <div class="cell" onclick="makeMove(0)"></div><div class="cell" onclick="makeMove(1)"></div><div class="cell" onclick="makeMove(2)"></div>
+            <div class="cell" onclick="makeMove(3)"></div><div class="cell" onclick="makeMove(4)"></div><div class="cell" onclick="makeMove(5)"></div>
+            <div class="cell" onclick="makeMove(6)"></div><div class="cell" onclick="makeMove(7)"></div><div class="cell" onclick="makeMove(8)"></div>
+        </div>
+
+        <div class="high-score-footer">🏆 ALL-TIME HIGH SCORE: <span id="high-score-val">0</span></div>
+        
+        <button onclick="resetToHome()" style="font-size: 0.7rem; padding: 8px 20px; margin-top:20px">Exit</button>
+    </div>
+
+    <div id="popup">
+        <h1 id="winner-text">🏆</h1>
+        <button onclick="closePopup()">Replay</button>
+    </div>
+
+    <audio id="bg-music" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        let symX = 'X', symO = 'O';
+        let currentPlayer = symX;
+        let matchStarter = symX;
+        let playerSide = symX;
+        let gameState = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+        let mode = '', difficulty = '';
+        let scores = { X: 0, O: 0, draw: 0 };
+        let currentStreak = 0, streakHolder = null;
+        let isMusicEnabled = true;
+
+        let highScore = localStorage.getItem('tttHighScore') || 0;
+
+        const music = document.getElementById('bg-music');
+        const clickSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFRm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU92T18AZAGAgICAZAGAgICAZAGAgICAZAGAgICAZAGAgICAZAGAgICAZAGAgICA');
+        const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2020/2020-preview.mp3');
+
+        document.getElementById('high-score-val').innerText = highScore;
+
+        function openSupport() {
+            window.open("https://youtube.com/@mrjokerff-098?si=XG1ihXWqf3U-x18I", "_blank");
+        }
+
+        // --- HELPLINE LOGIC ---
+        function showHelpline() {
+            toggleSettings(false);
+            document.getElementById('helpline-modal').style.display = 'flex';
+        }
+
+        function closeHelpline() {
+            document.getElementById('helpline-modal').style.display = 'none';
+        }
+
+        function contactAction(type) {
+            const phoneNumber = "+917002177238";
+            if (type === 'sms') {
+                window.location.href = `sms:${phoneNumber}`;
+            } else if (type === 'tel') {
+                window.location.href = `tel:${phoneNumber}`;
+            }
+            closeHelpline();
+        }
+        // ----------------------
+
+        function toggleSettings(show) { document.getElementById('settings-modal').style.display = show ? 'flex' : 'none'; }
+        
+        function toggleMusic() {
+            isMusicEnabled = !isMusicEnabled;
+            isMusicEnabled ? music.play() : music.pause();
+            document.getElementById('music-toggle-btn').innerText = `Music: ${isMusicEnabled ? 'ON' : 'OFF'}`;
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            document.getElementById('mode-toggle-btn').innerText = `Mode: ${isLight ? 'Light' : 'Dark'}`;
+        }
+
+        function clearHighScore() {
+            if(confirm("Are you sure you want to reset the high score?")) {
+                highScore = 0;
+                localStorage.setItem('tttHighScore', 0);
+                document.getElementById('high-score-val').innerText = 0;
+            }
+        }
+
+        function changeTheme(bg, accent) {
+            document.documentElement.style.setProperty('--bg-color', bg);
+            document.documentElement.style.setProperty('--accent-color', accent);
+            if(document.body.classList.contains('light-mode')) toggleDarkMode(); 
+        }
+
+        function changeSymbols(x, o) {
+            symX = x; symO = o;
+            document.getElementById('btn-side-x').innerText = x;
+            document.getElementById('btn-side-o').innerText = o;
+            document.getElementById('lbl-x').innerText = x;
+            document.getElementById('lbl-o').innerText = o;
+        }
+
+        function goToPage(pageId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelector('.settings-btn').style.display = (pageId === 'game-page') ? 'none' : 'flex';
+        }
+
+        function startGame() { music.volume = 0.1; if(isMusicEnabled) music.play(); goToPage('mode-page'); }
+        function handleMode(m) { mode = m; mode === 'PvC' ? goToPage('level-page') : goToPage('side-page'); }
+        function handleLevel(lvl) { difficulty = lvl; goToPage('side-page'); }
+        function handleSide(side) { playerSide = side; matchStarter = symX; resetGame(); goToPage('game-page'); }
+
+        function makeMove(index) {
+            if (gameState[index] !== "" || !gameActive) return;
+            if (mode === 'PvC' && currentPlayer !== playerSide) return;
+            executeMove(index, currentPlayer);
+            if (!checkResult()) swapTurn();
+        }
+
+        function swapTurn() {
+            currentPlayer = currentPlayer === symX ? symO : symX;
+            let turnText = (mode === 'PvC' && currentPlayer !== playerSide) ? "AI" : (currentPlayer === playerSide ? "YOU" : currentPlayer);
+            document.getElementById('status').innerText = `Turn: ${turnText}`;
+            if (mode === 'PvC' && currentPlayer !== playerSide) setTimeout(computerMove, 600);
+        }
+
+        function executeMove(index, player) {
+            gameState[index] = player;
+            const cells = document.querySelectorAll('.cell');
+            cells[index].innerText = player;
+            cells[index].style.color = player === symX ? 'var(--accent-color)' : 'var(--text-color)';
+            clickSound.play();
+        }
+
+        function checkResult() {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            let roundWon = wins.some(c => gameState[c[0]] && gameState[c[0]] === gameState[c[1]] && gameState[c[0]] === gameState[c[2]]);
+            if (roundWon) {
+                currentPlayer === symX ? scores.X++ : scores.O++;
+                let currentMax = Math.max(scores.X, scores.O);
+                if (currentMax > highScore) {
+                    highScore = currentMax;
+                    localStorage.setItem('tttHighScore', highScore);
+                    document.getElementById('high-score-val').innerText = highScore;
+                }
+                if (streakHolder === currentPlayer) currentStreak++; else { streakHolder = currentPlayer; currentStreak = 1; }
+                winSound.play(); updateScoreboard(); showPopup(`🏆 ${currentPlayer} WINS!`);
+                gameActive = false; return true;
+            }
+            if (!gameState.includes("")) {
+                scores.draw++; currentStreak = 0; streakHolder = null;
+                updateScoreboard(); showPopup("It's a draw! 🤝");
+                gameActive = false; return true;
+            }
+            return false;
+        }
+
+        function computerMove() {
+            if (!gameActive) return;
+            let aiChar = (playerSide === symX) ? symO : symX;
+            let move = difficulty !== 'Easy' ? getBestMove(aiChar) : gameState.map((v, i) => v === "" ? i : null).filter(v => v !== null)[0];
+            executeMove(move, aiChar);
+            if (!checkResult()) { currentPlayer = playerSide; document.getElementById('status').innerText = `Turn: YOU`; }
+        }
+
+        function getBestMove(ai) {
+            let op = ai === symX ? symO : symX;
+            for (let i of [ai, op]) {
+                for (let j=0; j<9; j++) {
+                    if (gameState[j] === "") {
+                        gameState[j] = i;
+                        if (checkWin(i)) { gameState[j] = ""; return j; }
+                        gameState[j] = "";
+                    }
+                }
+            }
+            return gameState[4] === "" ? 4 : gameState.indexOf("");
+        }
+
+        function checkWin(p) { return [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(c => c.every(idx => gameState[idx] === p)); }
+        function showPopup(t) { document.getElementById('winner-text').innerText = t; document.getElementById('popup').style.display = 'block'; }
+        function closePopup() { document.getElementById('popup').style.display = 'none'; matchStarter = matchStarter === symX ? symO : symX; resetGame(); }
+
+        function resetGame() {
+            gameState = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true; currentPlayer = matchStarter;
+            document.getElementById('status').innerText = `Turn: ${currentPlayer === playerSide ? "YOU" : "Opponent"}`;
+            document.querySelectorAll('.cell').forEach(c => c.innerText = "");
+            updateScoreboard();
+            if (mode === 'PvC' && currentPlayer !== playerSide) setTimeout(computerMove, 600);
+        }
+
+        function resetScores() { scores = { X: 0, O: 0, draw: 0 }; currentStreak = 0; streakHolder = null; updateScoreboard(); }
+        
+        function updateScoreboard() {
+            document.getElementById('score-x').innerText = scores.X;
+            document.getElementById('score-o').innerText = scores.O;
+            document.getElementById('score-draw').innerText = scores.draw;
+            document.getElementById('streak-display').innerText = streakHolder ? `${streakHolder} Streak: ${currentStreak} 💥` : "No streak yet...";
+        }
+        function resetToHome() { resetGame(); goToPage('opening-page'); }
+    </script>
+</body>
+</html>
